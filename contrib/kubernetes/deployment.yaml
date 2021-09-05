@@ -21,7 +21,7 @@ spec:
       serviceAccountName: prow-exporter
       containers:
         - name: prow-exporter
-          image: xrstf/prow_exporter:latest
+          image: quay.io/xrstf/prow_exporter:latest
           args:
           - -namespace=$(POD_NAMESPACE)
           env:
