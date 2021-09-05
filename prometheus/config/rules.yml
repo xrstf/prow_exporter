@@ -1,0 +1,9 @@
+# These are example rules to make the Grafana dashboard work.
+
+groups:
+  - name: prow-exporter
+    rules:
+      - record: ':prow_exporter_job_success_rate:'
+        expr: |
+          sum by (prowjob) (prow_job_states{state="success"}) /
+          sum by (prowjob) (prow_job_states{state=~"(success|failure)"})
