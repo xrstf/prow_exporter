@@ -13,13 +13,13 @@ if [ -z "$version" ]; then
   exit 1
 fi
 
-if git tag | grep "v$version" >/dev/null; then
+if git tag | grep "^v$version\$" >/dev/null; then
   echo "Version is already tagged."
   exit 1
 fi
 
 set_version() {
-  yq -i contrib/kubernetes/deployment.yaml 'spec.template.spec.containers[0].image' "ghcr.io/xrstf/prow_exporter:$1"
+  yq -i ".spec.template.spec.containers[0].image=\"ghcr.io/xrstf/prow_exporter:$1\"" contrib/kubernetes/deployment.yaml
 }
 
 set_version "$version"
