@@ -1,15 +1,21 @@
+// SPDX-FileCopyrightText: 2023 Christoph Mewes
+// SPDX-License-Identifier: MIT
+
 package main
 
 import (
 	"context"
-	"flag"
+	"fmt"
 	"net/http"
+	"runtime"
 	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/pflag"
+
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
@@ -18,11 +24,29 @@ import (
 	prowjobinfo "k8s.io/test-infra/prow/client/informers/externalversions"
 )
 
+// These variables get set by ldflags during compilation.
+var (
+	BuildTag    string
+	BuildCommit string
+	BuildDate   string // RFC3339 format ("2006-01-02T15:04:05Z07:00")
+)
+
+func printVersion() {
+	fmt.Printf(
+		"Kube Nukem %s (%s), built with %s on %s\n",
+		BuildTag,
+		BuildCommit[:10],
+		runtime.Version(),
+		BuildDate,
+	)
+}
+
 type options struct {
 	kubeconfig string
 	listenAddr string
 	namespace  string
-	debugLog   bool
+	verbose    bool
+	version    bool
 }
 
 func calculateCutoff() time.Time {
@@ -39,11 +63,12 @@ func main() {
 		listenAddr: ":9855",
 	}
 
-	flag.StringVar(&opt.kubeconfig, "kubeconfig", "", "Kubeconfig file for the Prow controlplane cluster (only required if out-of-cluster)")
-	flag.StringVar(&opt.listenAddr, "listen", opt.listenAddr, "address and port to listen on")
-	flag.StringVar(&opt.namespace, "namespace", opt.namespace, "namespace to watch Prowjobs in")
-	flag.BoolVar(&opt.debugLog, "debug", opt.debugLog, "enable more verbose logging")
-	flag.Parse()
+	pflag.StringVar(&opt.kubeconfig, "kubeconfig", "", "Kubeconfig file for the Prow controlplane cluster (only required if out-of-cluster)")
+	pflag.StringVarP(&opt.listenAddr, "listen", "l", opt.listenAddr, "address and port to listen on")
+	pflag.StringVarP(&opt.namespace, "namespace", "n", opt.namespace, "namespace to watch Prowjobs in")
+	pflag.BoolVarP(&opt.verbose, "verbose", "v", opt.verbose, "enable more verbose logging")
+	pflag.BoolVarP(&opt.version, "version", "V", opt.version, "show version info and exit immediately")
+	pflag.Parse()
 
 	// setup logging
 	var log = logrus.New()
@@ -52,7 +77,7 @@ func main() {
 		TimestampFormat: time.RFC1123,
 	})
 
-	if opt.debugLog {
+	if opt.verbose {
 		log.SetLevel(logrus.DebugLevel)
 	}
 

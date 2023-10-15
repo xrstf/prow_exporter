@@ -21,10 +21,10 @@ spec:
       serviceAccountName: prow-exporter
       containers:
         - name: prow-exporter
-          image: quay.io/xrstf/prow_exporter:latest
+          image: ghcr.io/xrstf/prow_exporter:latest
           imagePullPolicy: Always
           args:
-            - -namespace=$(POD_NAMESPACE)
+            - --namespace=$(POD_NAMESPACE)
           env:
             - name: POD_NAMESPACE
               valueFrom:

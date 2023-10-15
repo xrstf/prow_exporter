@@ -19,7 +19,7 @@ if git tag | grep "v$version" >/dev/null; then
 fi
 
 set_version() {
-  yq write -i contrib/kubernetes/deployment.yaml 'spec.template.spec.containers[0].image' "xrstf/aws_exporter:$1"
+  yq -i contrib/kubernetes/deployment.yaml 'spec.template.spec.containers[0].image' "ghcr.io/xrstf/prow_exporter:$1"
 }
 
 set_version "$version"
