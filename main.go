@@ -70,6 +70,11 @@ func main() {
 	pflag.BoolVarP(&opt.version, "version", "V", opt.version, "show version info and exit immediately")
 	pflag.Parse()
 
+	if opt.version {
+		printVersion()
+		return
+	}
+
 	// setup logging
 	var log = logrus.New()
 	log.SetFormatter(&logrus.TextFormatter{
