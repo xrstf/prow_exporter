@@ -21,7 +21,7 @@ spec:
       serviceAccountName: prow-exporter
       containers:
         - name: prow-exporter
-          image: ghcr.io/xrstf/prow_exporter:0.2.0
+          image: ghcr.io/xrstf/prow_exporter:latest
           imagePullPolicy: Always
           args:
             - --namespace=$(POD_NAMESPACE)
